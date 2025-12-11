@@ -264,9 +264,6 @@ def main():
         "rmax": 0.3,  # Maximum range
     }
 
-    # =========================================================
-    # CMA-ES Optimization
-    # =========================================================
     # Parameters per profiler: [rho, azimuth, z, yaw, pitch, roll]
     dim = 6 * N_PROFILERS
 
@@ -289,34 +286,17 @@ def main():
     # yaw: -pi/4 to pi/4 (±45° horizontal aim offset)
     # pitch: -pi/3 to pi/3 (±60° tilt)
     # roll: -pi/2 to pi/2 (±90° plane rotation)
-    lower_bounds = [0.2, -np.pi, -0.2, -np.pi / 4, -np.pi / 3, -np.pi / 2] * N_PROFILERS
-    upper_bounds = [0.6, np.pi, 0.4, np.pi / 4, np.pi / 3, np.pi / 2] * N_PROFILERS
 
-    for i in range(len(x0)):
-        if x0[i] < lower_bounds[i] or x0[i] > upper_bounds[i]:
-            print(
-                f"WARNING: x0[{i}] = {x0[i]:.3f} is outside bounds [{lower_bounds[i]:.3f}, {upper_bounds[i]:.3f}]"
-            )
-            # Clamp to bounds
-            x0[i] = np.clip(x0[i], lower_bounds[i], upper_bounds[i])
-            print(f"  Adjusted to: {x0[i]:.3f}")
-
-    bound_ranges = np.array(upper_bounds) - np.array(lower_bounds)
-    sigma = np.mean(bound_ranges) * 0.25
+    lower_bounds = [0.3, -np.pi, 0.0, -np.pi / 4, -np.pi / 3, -np.pi / 2] * N_PROFILERS
+    upper_bounds = [1.0, np.pi, 1.0, np.pi / 4, np.pi / 3, np.pi / 2] * N_PROFILERS
 
     print(f"Starting CMA-ES optimization for {N_PROFILERS} profiler(s)...")
     print(f"Optimizing {dim} parameters: [rho, azimuth, z, yaw, pitch, roll]")
-    print(f"Initial guess x0: {x0}")
-    print(f"Lower bounds: {lower_bounds}")
-    print(f"Upper bounds: {upper_bounds}")
     print(f"Points: {len(points)}, Rotation angles: {len(rotation_angles)}")
-    print(f"Initial sigma: {sigma:.3f}")
-    print(f"Bound ranges: {bound_ranges}")
-    print()
 
     es = cma.CMAEvolutionStrategy(
         x0,
-        sigma,
+        0.2,
         {
             "bounds": [lower_bounds, upper_bounds],
             "maxiter": 50,
